@@ -1,9 +1,12 @@
 'use client';
 
+import { useState } from 'react';
 import RequestCard from '@/app/components/volunteer/card';
 import CommunityArticle from '@/app/components/volunteer/community';
 
 const VolunteerHome = () => {
+  const [showAllRequests, setShowAllRequests] = useState(false);
+
   const stats = [
     { label: 'No of orders delivered', value: '12' },
     { label: 'Feedback received', value: '4' },
@@ -14,7 +17,18 @@ const VolunteerHome = () => {
     { name: 'Aditya', quantity: 12, location: 'Kothanur' },
     { name: 'Aditya', quantity: 12, location: 'Kothanur' },
     { name: 'Aditya', quantity: 12, location: 'Kothanur' },
+    { name: 'Aditya', quantity: 12, location: 'Kothanur' },
+    { name: 'Aditya', quantity: 12, location: 'Kothanur' },
+    { name: 'Aditya', quantity: 12, location: 'Kothanur' },
+    { name: 'Aditya', quantity: 12, location: 'Kothanur' },
+    { name: 'Aditya', quantity: 12, location: 'Kothanur' },
   ];
+
+  const visibleRequests = showAllRequests ? requests : requests.slice(0, 3);
+
+  const toggleRequests = () => {
+    setShowAllRequests(!showAllRequests);
+  };
 
   const communityArticles = [
     {
@@ -58,7 +72,7 @@ const VolunteerHome = () => {
         {/* Requests Section */}
         <div className="mb-8">
           <h2 className="text-xl font-bold text-gray-900 mb-4">REQUESTS</h2>
-          {requests.map((request, index) => (
+          {visibleRequests.map((request, index) => (
             <RequestCard
               key={index}
               name={request.name}
@@ -66,7 +80,22 @@ const VolunteerHome = () => {
               location={request.location}
             />
           ))}
-          <button className="text-[#FF7058] text-sm font-medium w-full">+ MORE</button>
+          {requests.length > 3 && (
+            <button 
+              onClick={toggleRequests}
+              className="text-[#FF7058] text-sm font-medium w-full hover:text-[#ff5252] transition-colors flex items-center justify-center gap-1"
+            >
+              {showAllRequests ? (
+                <>
+                  <span className='bg-[#FF7058] text-white px-2 py-2 font-semibold rounded-full'>SHOW LESS</span>
+                </>
+              ) : (
+                <>
+                  <span className='bg-[#FF7058] text-white px-2 py-2 font-semibold rounded-full'>SHOW MORE</span>
+                </>
+              )}
+            </button>
+          )}
         </div>
 
         {/* Community Section */}
