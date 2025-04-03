@@ -43,8 +43,8 @@ const Page: NextPage<Props> = ({}) => {
   ]
 
   return (
-    <div className="min-h-screen bg-white p-6">
-      <div className="max-w-md mx-auto mt-16">
+    <div className="min-h-screen bg-white p-6 flex flex-col">
+      <div className="max-w-md mx-auto mt-24 flex-1">
         <div className="mb-8">
           <h1 className="text-2xl font-semibold text-gray-900 capitalize">
             Select your role
@@ -81,7 +81,9 @@ const Page: NextPage<Props> = ({}) => {
             </div>
           ))}
         </div>
+      </div>
 
+      <div className="max-w-md mx-auto w-full">
         <button
           onClick={handleContinue}
           disabled={!selectedRole}
