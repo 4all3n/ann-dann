@@ -17,7 +17,7 @@ const Page: NextPage<Props> = ({}) => {
   const handleContinue = () => {
     if (selectedRole) {
       // Navigate based on role
-      router.push(`/${selectedRole.toLowerCase()}_details`)
+      router.push(`/${selectedRole.toLowerCase()}/details`)
     }
   }
 

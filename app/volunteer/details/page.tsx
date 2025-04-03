@@ -26,6 +26,7 @@ export default function VolunteerDetailsPage() {
     city: '',
     aadharId: '',
   });
+  const [error, setError] = useState<string>('');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -33,6 +34,18 @@ export default function VolunteerDetailsPage() {
       ...prev,
       [name]: value,
     }));
+    setError(''); // Clear error when user types
+  };
+
+  const validateForm = () => {
+    const requiredFields = ['Full Name', 'Phone Number', 'Pin Code', 'City', 'Aadhar ID'];
+    const emptyFields = requiredFields.filter(field => !formData[field as keyof VolunteerDetails]);
+    
+    if (emptyFields.length > 0) {
+      setError(`Please fill in all required fields: ${emptyFields.join(', ')}`);
+      return false;
+    }
+    return true;
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -44,11 +57,19 @@ export default function VolunteerDetailsPage() {
   };
 
   const handleLocation = () => {
+    if (!validateForm()) {
+      return;
+    }
+
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
         console.log(position.coords);
-        // Handle location data
+        // Navigate to location page
+        router.push('/volunteer/location');
       });
+    } else {
+      // If geolocation is not supported, still navigate to location page
+      router.push('/volunteer/location');
     }
   };
 
@@ -60,6 +81,11 @@ export default function VolunteerDetailsPage() {
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {error && (
+            <div className="text-red-500 text-sm p-3 bg-red-50 rounded-md">
+              {error}
+            </div>
+          )}
           <div className="space-y-4">
             <div>
               <label className="block text-xs uppercase text-gray-500 mb-1">
@@ -145,12 +171,26 @@ export default function VolunteerDetailsPage() {
 
             <div>
               <label className="block text-xs uppercase text-gray-500 mb-1">
+                Aadhar ID
+              </label>
+              <input
+                type="text"
+                name="aadharId"
+                value={formData.aadharId}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FF7058]"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs uppercase text-gray-500 mb-1">
                 Location
               </label>
               <button
                 type="button"
                 onClick={handleLocation}
-                className="w-full px-3 py-2 border border-[#FF7058] text-[#FF7058] rounded-md flex items-center justify-center space-x-2 bg-white hover:bg-[#FFF5F5]"
+                className="w-full px-3 py-2 border border-[#FF7058] text-[#FF7058] rounded-md flex items-center justify-center space-x-2 bg-white hover:bg-[#FFF5F5] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Image
                   src={locationIcon}
@@ -163,39 +203,8 @@ export default function VolunteerDetailsPage() {
               </button>
             </div>
 
-            <div>
-              <label className="block text-xs uppercase text-gray-500 mb-1">
-                Aadhar ID
-              </label>
-              <button
-                type="button"
-                onClick={() => {/* Handle file upload */}}
-                className="w-full px-3 py-2 border border-[#FF7058] text-[#FF7058] rounded-md flex items-center justify-center space-x-2 bg-white hover:bg-[#FFF5F5]"
-              >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 4v16m-8-8h16"
-                  />
-                </svg>
-                <span> Upload</span>
-              </button>
-            </div>
+        
           </div>
-
-          <button
-            type="submit"
-            className="w-full bg-[#FF7058] text-white py-3 rounded-md hover:bg-[#FF5252] transition-colors"
-          >
-            Next
-          </button>
         </form>
       </div>
     </div>
