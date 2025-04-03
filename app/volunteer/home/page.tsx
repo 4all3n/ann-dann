@@ -1,0 +1,96 @@
+'use client';
+
+import RequestCard from '@/app/components/volunteer/card';
+import CommunityArticle from '@/app/components/volunteer/community';
+
+const VolunteerHome = () => {
+  const stats = [
+    { label: 'No of orders delivered', value: '12' },
+    { label: 'Feedback received', value: '4' },
+    { label: 'Points earned', value: '200' },
+  ];
+
+  const requests = [
+    { name: 'Aditya', quantity: 12, location: 'Kothanur' },
+    { name: 'Aditya', quantity: 12, location: 'Kothanur' },
+    { name: 'Aditya', quantity: 12, location: 'Kothanur' },
+  ];
+
+  const communityArticles = [
+    {
+      image: '/placeholder.jpg',
+      title: 'NAME OF ARTICLE',
+      description: 'Lorem ipsum dolor sit amet consectetur.',
+    },
+    {
+      image: '/placeholder.jpg',
+      title: 'NAME OF ARTICLE',
+      description: 'Lorem ipsum dolor sit amet consectetur.',
+    },
+    {
+      image: '/placeholder.jpg',
+      title: 'NAME OF ARTICLE',
+      description: 'Lorem ipsum dolor sit amet consectetur.',
+    },
+  ];
+
+  return (
+    <div className="min-h-screen bg-white p-6">
+      <div className="max-w-md mx-auto">
+        {/* Welcome Section */}
+        <div className="mb-8">
+          <p className="text-[#FF7058] text-sm mb-1 font-semibold">WELCOME VOLUNTEER</p>
+          <h1 className="text-2xl font-bold text-gray-900">Azonix Ken</h1>
+        </div>
+
+        {/* Stats Section */}
+        <div className="bg-[#FF7058] rounded-lg p-4 mb-8">
+          <div className="grid grid-cols-3 gap-2">
+            {stats.map((stat, index) => (
+              <div key={index} className="text-center">
+                <p className="text-white text-xl font-semibold">{stat.value}</p>
+                <p className="text-white text-sm font-semibold">{stat.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Requests Section */}
+        <div className="mb-8">
+          <h2 className="text-xl font-bold text-gray-900 mb-4">REQUESTS</h2>
+          {requests.map((request, index) => (
+            <RequestCard
+              key={index}
+              name={request.name}
+              quantity={request.quantity}
+              location={request.location}
+            />
+          ))}
+          <button className="text-[#FF7058] text-sm font-medium w-full">+ MORE</button>
+        </div>
+
+        {/* Community Section */}
+        <div>
+          <h2 className="text-xl font-bold text-gray-900 mb-4">COMMUNITY</h2>
+          <div className="grid grid-cols-1 gap-4">
+            {communityArticles.map((article, index) => (
+              <CommunityArticle
+                key={index}
+                image={article.image}
+                title={article.title}
+                description={article.description}
+              />
+            ))}
+          </div>
+          <div className="flex justify-center mt-4 gap-1">
+            <div className="w-2 h-2 rounded-full bg-[#FF7058]"></div>
+            <div className="w-2 h-2 rounded-full bg-gray-300"></div>
+            <div className="w-2 h-2 rounded-full bg-gray-300"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default VolunteerHome;

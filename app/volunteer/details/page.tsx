@@ -53,7 +53,7 @@ export default function VolunteerDetailsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white p-6">
+    <div className="min-h-screen bg-white p-6 ">
       <div className="max-w-md mx-auto">
         <h1 className="text-2xl font-semibold text-gray-800 mb-8">
           Volunteer Details
