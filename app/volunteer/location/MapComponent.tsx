@@ -1,18 +1,17 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import mapPin from './assets/Map Pin.png';
 
-// Fix for Leaflet marker icons in Next.js
-// This is needed because Leaflet uses image paths that don't work with Next.js
-const fixLeafletIcon = () => {
-  // @ts-ignore
-  delete L.Icon.Default.prototype._getIconUrl;
-  L.Icon.Default.mergeOptions({
-    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+// Create a custom pin marker icon
+const createCustomIcon = () => {
+  return L.icon({
+    iconUrl: mapPin.src,
+    iconSize: [40, 40],
+    iconAnchor: [20, 40], // point of the icon which will correspond to marker's location
+    className: 'custom-marker'
   });
 };
 
@@ -28,8 +27,6 @@ export default function MapComponent({ latitude, longitude }: MapComponentProps)
 
   useEffect(() => {
     if (!mapContainerRef.current) return;
-
-    fixLeafletIcon();
 
     // Initialize map
     if (!mapRef.current) {
@@ -47,7 +44,9 @@ export default function MapComponent({ latitude, longitude }: MapComponentProps)
       if (markerRef.current) {
         markerRef.current.setLatLng([latitude, longitude]);
       } else {
-        markerRef.current = L.marker([latitude, longitude]).addTo(mapRef.current);
+        markerRef.current = L.marker([latitude, longitude], {
+          icon: createCustomIcon()
+        }).addTo(mapRef.current);
       }
     }
 

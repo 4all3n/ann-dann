@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import locationIcon from './assets/location.png';
@@ -33,36 +33,107 @@ interface LocationDetails {
   longitude: number;
 }
 
+interface SearchResult {
+  display_name: string;
+  lat: string;
+  lon: string;
+}
+
 export default function SelectLocationPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLocation, setSelectedLocation] = useState<LocationDetails | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [showResults, setShowResults] = useState(false);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+
+  // Click outside handler to close search results
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setShowResults(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // Debounced search function
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      if (searchQuery.length > 2) {
+        try {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=5`,
+            {
+              headers: {
+                'Accept-Language': 'en',
+                'User-Agent': 'AnnDann/1.0'
+              }
+            }
+          );
+          const data = await response.json();
+          setSearchResults(data);
+          setShowResults(true);
+        } catch (error) {
+          console.error('Error searching locations:', error);
+          setSearchResults([]);
+        }
+      } else {
+        setSearchResults([]);
+        setShowResults(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-    // Implement search functionality
+    const value = e.target.value;
+    setSearchQuery(value);
+    
+    // If the input is cleared, reset the search state
+    if (!value.trim()) {
+      setSearchResults([]);
+      setShowResults(false);
+    } else {
+      // Show results again if there are any
+      if (searchResults.length > 0) {
+        setShowResults(true);
+      }
+    }
+  };
+
+  const handleSelectSearchResult = (result: SearchResult) => {
+    setSelectedLocation({
+      address: result.display_name,
+      latitude: parseFloat(result.lat),
+      longitude: parseFloat(result.lon)
+    });
+    setSearchQuery(result.display_name);
+    setShowResults(false);
   };
 
   const handleUseCurrentLocation = () => {
     if (navigator.geolocation) {
-      // Show loading state
       setIsLoading(true);
       setSelectedLocation(null);
       
       navigator.geolocation.getCurrentPosition(
-        // Success callback
         async (position) => {
           const { latitude, longitude } = position.coords;
           
           try {
-            // Use OpenStreetMap Nominatim API to get the address
             const response = await fetch(
               `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`,
               {
                 headers: {
                   'Accept-Language': 'en',
-                  'User-Agent': 'AnnDann/1.0' // Replace with your app name
+                  'User-Agent': 'AnnDann/1.0'
                 }
               }
             );
@@ -70,16 +141,13 @@ export default function SelectLocationPage() {
             const data = await response.json();
             
             if (data && data.display_name) {
-              // Get the formatted address
-              const formattedAddress = data.display_name;
-              
               setSelectedLocation({
-                address: formattedAddress,
+                address: data.display_name,
                 latitude: latitude,
                 longitude: longitude,
               });
+              setSearchQuery(data.display_name);
             } else {
-              // Fallback if geocoding fails
               setSelectedLocation({
                 address: "Current Location",
                 latitude: latitude,
@@ -89,7 +157,6 @@ export default function SelectLocationPage() {
             }
           } catch (error) {
             console.error("Error fetching address:", error);
-            // Fallback if API call fails
             setSelectedLocation({
               address: "Current Location",
               latitude: latitude,
@@ -99,7 +166,6 @@ export default function SelectLocationPage() {
             setIsLoading(false);
           }
         },
-        // Error callback
         (error) => {
           let errorMessage = "Unable to retrieve your location";
           
@@ -121,7 +187,6 @@ export default function SelectLocationPage() {
           alert(errorMessage);
           setIsLoading(false);
         },
-        // Options
         {
           enableHighAccuracy: true,
           timeout: 10000,
@@ -135,7 +200,6 @@ export default function SelectLocationPage() {
 
   const handleContinue = () => {
     if (selectedLocation) {
-      // Save location and navigate
       router.push('/next-page');
     }
   };
@@ -148,7 +212,7 @@ export default function SelectLocationPage() {
         </h1>
 
         {/* Search Bar */}
-        <div className="relative mb-4">
+        <div className="relative mb-4 z-[1000]" ref={searchContainerRef}>
           <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
             <svg
               className="w-5 h-5 text-gray-400"
@@ -166,15 +230,42 @@ export default function SelectLocationPage() {
           </div>
           <input
             type="text"
-            placeholder="Search dishes, restaurants"
+            placeholder="Search for a location"
             value={searchQuery}
             onChange={handleSearch}
+            onFocus={() => {
+              if (searchResults.length > 0) {
+                setShowResults(true);
+              }
+            }}
             className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF7058] focus:border-transparent text-gray-600"
           />
+          
+          {/* Search Results Dropdown */}
+          {showResults && searchResults.length > 0 && (
+            <div className="absolute z-[1000] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto">
+              {searchResults.map((result, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleSelectSearchResult(result)}
+                  className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-start gap-2"
+                >
+                  <Image
+                    src={mapPin}
+                    alt="Location"
+                    width={16}
+                    height={16}
+                    className="mt-1 flex-shrink-0"
+                  />
+                  <span className="text-sm text-gray-700">{result.display_name}</span>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Map Container */}
-        <div className="relative w-full h-[400px] bg-gray-100 rounded-lg mb-6 overflow-hidden">
+        <div className="relative w-full h-[400px] bg-gray-100 rounded-lg mb-6 overflow-hidden z-0">
           {selectedLocation ? (
             <Map 
               latitude={selectedLocation.latitude} 
