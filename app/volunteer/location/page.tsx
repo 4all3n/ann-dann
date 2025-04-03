@@ -6,6 +6,7 @@ import Image from 'next/image';
 import locationIcon from './assets/location.png';
 import mapPin from './assets/Map Pin.png';
 import pinRadar from './assets/Pin Radar.png';
+import mapsBackground from './assets/maps.png';
 import dynamic from 'next/dynamic';
 
 // Dynamically import the Map component to avoid SSR issues with Leaflet
@@ -200,7 +201,7 @@ export default function SelectLocationPage() {
 
   const handleContinue = () => {
     if (selectedLocation) {
-      router.push('/next-page');
+      router.push('/volunteer/availbility');
     }
   };
 
@@ -266,6 +267,17 @@ export default function SelectLocationPage() {
 
         {/* Map Container */}
         <div className="relative w-full h-[400px] bg-gray-100 rounded-lg mb-6 overflow-hidden z-0">
+          {/* Background Map Image */}
+          <div className="absolute inset-0">
+            <Image
+              src={mapsBackground}
+              alt="Map Background"
+              layout="fill"
+              objectFit="cover"
+              className="opacity-50"
+            />
+          </div>
+          
           {selectedLocation ? (
             <Map 
               latitude={selectedLocation.latitude} 
@@ -287,7 +299,7 @@ export default function SelectLocationPage() {
           <button
             onClick={handleUseCurrentLocation}
             disabled={isLoading}
-            className="absolute bottom-4 left-1/2 transform -translate-x-1/2 px-4 py-2.5 bg-white border border-[#FF7058] text-[#FF7058] rounded-lg flex items-center gap-2 hover:bg-[#FFF5F5] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="absolute w-[60%] bottom-4 left-1/2 transform -translate-x-1/2 px-4 py-2.5 bg-white border border-[#FF7058] text-[#FF7058] rounded-lg flex items-center gap-2 hover:bg-[#FFF5F5] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Image
               src={locationIcon}

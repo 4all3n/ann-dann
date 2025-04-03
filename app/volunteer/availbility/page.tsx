@@ -31,7 +31,7 @@ const SuccessModal = ({ onContinue }: { onContinue: () => void }) => {
   );
 };
 
-const ErrorModal = ({ onClose }: { onClose: () => void }) => {
+const ErrorModal = ({ message, onClose }: { message: string, onClose: () => void }) => {
   return (
     <div className="fixed inset-0 bg-[#0000002c] flex items-center justify-center z-50">
       <div className="bg-white rounded-2xl p-6 w-80 flex flex-col items-center">
@@ -44,7 +44,7 @@ const ErrorModal = ({ onClose }: { onClose: () => void }) => {
 
         {/* Error Message */}
         <p className="text-center text-gray-800 font-medium mb-6">
-          Please select at least<br />one day!
+          {message}
         </p>
 
         {/* OK Button */}
@@ -65,6 +65,7 @@ const AvailabilityPage = () => {
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const weekdays = ['M', 'T', 'W', 'Th', 'F'];
   const weekendDays = ['S', 'S'];
@@ -100,7 +101,11 @@ const AvailabilityPage = () => {
   };
 
   const handleNext = () => {
-    if (selectedDays.length === 0) {
+    if (!selectedTime) {
+      setErrorMessage('Please select a time slot\n(Morning/Afternoon/Night)');
+      setShowErrorModal(true);
+    } else if (selectedDays.length === 0) {
+      setErrorMessage('Please select at least\none day!');
       setShowErrorModal(true);
     } else {
       setShowSuccessModal(true);
@@ -108,7 +113,7 @@ const AvailabilityPage = () => {
   };
 
   const handleContinue = () => {
-    router.push('/volunteer/location');
+    router.push('/volunteer/home');
   };
 
   return (
@@ -118,6 +123,7 @@ const AvailabilityPage = () => {
 
         {/* Time Slots */}
         <div className="bg-white rounded-xl border border-gray-200 p-4 mb-8">
+          <h2 className="text-lg font-semibold mb-4 text-gray-700">Select Time Slot</h2>
           {['Morning', 'Afternoon', 'Night'].map((time) => (
             <div key={time} className="mb-4 last:mb-0">
               <label className="flex items-center cursor-pointer">
@@ -198,7 +204,7 @@ const AvailabilityPage = () => {
       {showSuccessModal && <SuccessModal onContinue={handleContinue} />}
       
       {/* Error Modal */}
-      {showErrorModal && <ErrorModal onClose={() => setShowErrorModal(false)} />}
+      {showErrorModal && <ErrorModal message={errorMessage} onClose={() => setShowErrorModal(false)} />}
     </div>
   );
 };
