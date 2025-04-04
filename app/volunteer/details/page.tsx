@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import locationIcon from './assets/location.png';
@@ -11,7 +11,6 @@ interface VolunteerDetails {
   occupation: string;
   address: string;
   pinCode: string;
-  city: string;
   aadharId: string;
 }
 
@@ -23,26 +22,35 @@ export default function VolunteerDetailsPage() {
     occupation: '',
     address: '',
     pinCode: '',
-    city: '',
     aadharId: '',
   });
   const [error, setError] = useState<string>('');
 
+  // Load data from sessionStorage on component mount
+  useEffect(() => {
+    const savedData = sessionStorage.getItem('volunteerDetails');
+    if (savedData) {
+      setFormData(JSON.parse(savedData));
+    }
+  }, []);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
+    const updatedData = {
+      ...formData,
       [name]: value,
-    }));
-    setError(''); // Clear error when user types
+    };
+    setFormData(updatedData);
+    sessionStorage.setItem('volunteerDetails', JSON.stringify(updatedData));
+    setError('');
   };
 
   const validateForm = () => {
-    const requiredFields = ['Full Name', 'Phone Number', 'Pin Code', 'City', 'Aadhar ID'];
+    const requiredFields = ['fullName', 'phoneNumber', 'pinCode', 'aadharId'];
     const emptyFields = requiredFields.filter(field => !formData[field as keyof VolunteerDetails]);
     
     if (emptyFields.length > 0) {
-      setError(`Please fill in all required fields: ${emptyFields.join(', ')}`);
+      setError(`Please fill in all required fields: ${emptyFields.map(field => field.replace(/([A-Z])/g, ' $1').trim()).join(', ')}`);
       return false;
     }
     return true;
@@ -50,27 +58,13 @@ export default function VolunteerDetailsPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission here
+    if (!validateForm()) return;
     console.log(formData);
-    // Navigate to next page
-    // router.push('/next-page');
   };
 
   const handleLocation = () => {
-    if (!validateForm()) {
-      return;
-    }
-
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition((position) => {
-        console.log(position.coords);
-        // Navigate to location page
-        router.push('/volunteer/location');
-      });
-    } else {
-      // If geolocation is not supported, still navigate to location page
-      router.push('/volunteer/location');
-    }
+    if (!validateForm()) return;
+    router.push('/volunteer/location');
   };
 
   return (
@@ -157,20 +151,6 @@ export default function VolunteerDetailsPage() {
 
             <div>
               <label className="block text-xs uppercase text-gray-500 mb-1">
-                City
-              </label>
-              <input
-                type="text"
-                name="city"
-                value={formData.city}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FF7058]"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs uppercase text-gray-500 mb-1">
                 Aadhar ID
               </label>
               <input
@@ -202,8 +182,6 @@ export default function VolunteerDetailsPage() {
                 <span>Use current location</span>
               </button>
             </div>
-
-        
           </div>
         </form>
       </div>

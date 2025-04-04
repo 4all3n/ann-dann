@@ -110,13 +110,19 @@ export default function SelectLocationPage() {
   };
 
   const handleSelectSearchResult = (result: SearchResult) => {
-    setSelectedLocation({
+    const location = {
       address: result.display_name,
       latitude: parseFloat(result.lat),
       longitude: parseFloat(result.lon)
-    });
+    };
+    setSelectedLocation(location);
     setSearchQuery(result.display_name);
     setShowResults(false);
+    
+    // Update address in volunteerDetails
+    const volunteerDetails = JSON.parse(sessionStorage.getItem('volunteerDetails') || '{}');
+    volunteerDetails.address = result.display_name;
+    sessionStorage.setItem('volunteerDetails', JSON.stringify(volunteerDetails));
   };
 
   const handleUseCurrentLocation = () => {
@@ -142,12 +148,18 @@ export default function SelectLocationPage() {
             const data = await response.json();
             
             if (data && data.display_name) {
-              setSelectedLocation({
+              const location = {
                 address: data.display_name,
                 latitude: latitude,
                 longitude: longitude,
-              });
+              };
+              setSelectedLocation(location);
               setSearchQuery(data.display_name);
+
+              // Update address in volunteerDetails
+              const volunteerDetails = JSON.parse(sessionStorage.getItem('volunteerDetails') || '{}');
+              volunteerDetails.address = data.display_name;
+              sessionStorage.setItem('volunteerDetails', JSON.stringify(volunteerDetails));
             } else {
               setSelectedLocation({
                 address: "Current Location",
