@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import RequestCard from '@/app/components/volunteer/card';
 import CommunityArticle from '@/app/components/volunteer/community';
+import c1 from './assets/c1.png';
+import c2 from './assets/c2.png';
 
 const VolunteerHome = () => {
   const [showAllRequests, setShowAllRequests] = useState(false);
@@ -32,19 +34,19 @@ const VolunteerHome = () => {
 
   const communityArticles = [
     {
-      image: '/placeholder.jpg',
-      title: 'NAME OF ARTICLE',
-      description: 'Lorem ipsum dolor sit amet consectetur.',
+      image: c1,
+      title: 'DISCUSSION',
+      description: 'Hey everyone, I run a restaurant and often have leftover food at closing time. What are the best practices to ensure food is stored safely before donation',
     },
     {
-      image: '/placeholder.jpg',
-      title: 'NAME OF ARTICLE',
-      description: 'Lorem ipsum dolor sit amet consectetur.',
+      image: c2,
+      title: 'ANNOUNCEMENT',
+      description: "We have seen an increase in food donations, but we need more volunteers for pickup and delivery in Bengaluru. If you're interested, please sign up on our portal",
     },
     {
-      image: '/placeholder.jpg',
-      title: 'NAME OF ARTICLE',
-      description: 'Lorem ipsum dolor sit amet consectetur.',
+      image: c1,
+      title: 'DISCUSSION',
+      description: 'Hey everyone, I run a restaurant and often have leftover food at closing time. What are the best practices to ensure food is stored safely before donation',
     },
   ];
 
@@ -80,20 +82,12 @@ const VolunteerHome = () => {
               location={request.location}
             />
           ))}
-          {requests.length > 3 && (
-            <button 
-              onClick={toggleRequests}
-              className="text-[#FF7058] text-sm font-medium w-full hover:text-[#ff5252] transition-colors flex items-center justify-center gap-1"
+           {requests.length > 3 && (
+            <button
+              onClick={() => setShowAllRequests(!showAllRequests)}
+              className="text-white font-semibold bg-[#FF7058] px-4 py-2 rounded-xl text-sm justify-center mx-auto  hover:underline flex items-center gap-1"
             >
-              {showAllRequests ? (
-                <>
-                  <span className='bg-[#FF7058] text-white px-2 py-2 font-semibold rounded-full'>SHOW LESS</span>
-                </>
-              ) : (
-                <>
-                  <span className='bg-[#FF7058] text-white px-2 py-2 font-semibold rounded-full'>SHOW MORE</span>
-                </>
-              )}
+              {showAllRequests ? 'Show Less' : 'Show More'}
             </button>
           )}
         </div>

@@ -1,5 +1,8 @@
+import { StaticImageData } from 'next/image';
+import Image from 'next/image';
+
 interface CommunityArticleProps {
-  image: string;
+  image: string | StaticImageData;
   title: string;
   description: string;
 }
@@ -8,9 +11,11 @@ const CommunityArticle = ({ image, title, description }: CommunityArticleProps) 
   return (
     <div className="bg-white rounded-lg overflow-hidden shadow-sm">
       <div className="aspect-video bg-gray-400">
-        <img 
+        <Image 
           src={image} 
           alt={title}
+          width={400}
+          height={225}
           className="w-full h-full object-cover"
         />
       </div>

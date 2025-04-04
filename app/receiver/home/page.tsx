@@ -6,6 +6,14 @@ import Image from 'next/image';
 import logo from './assets/Logo.png';
 import RequestCard from '@/app/components/receiver/card';
 import CommunityArticle from '@/app/components/donor/community';
+import food1 from './assets/1.png';
+import food2 from './assets/2.png';
+import food3 from './assets/3.png';
+import food4 from './assets/4.png';
+import food5 from './assets/5.png';
+import c1 from './assets/c1.png';
+import c2 from './assets/c2.png';
+
 
 export default function ReceiverHomePage() {
   const router = useRouter();
@@ -15,43 +23,44 @@ export default function ReceiverHomePage() {
     {
       name: 'Hotel Azonix',
       distance: '2.5 km',
-      image: '/food1.jpg',
+      image: food1,
       status: 'Processing' as const,
     },
     {
       name: 'Hotel Taj',
       distance: '2.5 km',
-      image: '/food2.jpg',
+      image: food2,
       status: 'Completed' as const,
     },
     {
       name: 'Azonix Ken',
       distance: '2.5 km',
-      image: '/food3.jpg',
+      image: food3,
       status: 'Completed' as const,
     },
     {
-      name: 'Grand Hotel',
-      distance: '3.0 km',
-      image: '/food4.jpg',
-      status: 'Completed' as const,
+        name: 'Kake da dhaba',
+        distance: '5 km',
+        image: food4,
+        status: 'Completed' as const,
     },
     {
-      name: 'Food Palace',
-      distance: '3.2 km',
-      image: '/food5.jpg',
-      status: 'Processing' as const,
-    },
+        name: 'Hotel kaj',
+        distance: '1.5 km',
+        image: food5,
+        status: 'Completed' as const,
+    }
+
   ];
 
   const communityPosts = [
     {
-      image: '/restaurant.jpg',
+      image: c1,
       title: 'DISCUSSION',
       description: 'Hey everyone, I run a restaurant and often have excess food. What are the best practices to ensure food is stored safely before donation',
     },
     {
-      image: '/grand.jpg',
+      image: c2,
       title: 'ANNOUNCEMENT',
       description: 'We have seen an increase in food donations, but we need more volunteers for delivery in Bengaluru. If you\'re interested, please sign up on our portal',
     },
@@ -71,8 +80,8 @@ export default function ReceiverHomePage() {
           className="h-10 w-auto"
         />
         <button
-          onClick={() => router.push('/user/login')}
-          className="text-[#FF7058] font-medium"
+          onClick={() => router.push('/select_role')}
+          className="text-white bg-[#FF7058] px-4 py-2 rounded-xl font-medium"
         >
           User Login
         </button>
@@ -88,13 +97,13 @@ export default function ReceiverHomePage() {
         </p>
 
         {/* Create Request Button */}
-        <div className="bg-[#FFF1F0] rounded-xl p-4">
-          <p className="text-gray-600 mb-2">Know someone in need of a meal?</p>
+        <div className="bg-[#FFF1F0] rounded-xl p-4 flex justify-center items-center flex-col gap-2">
+          <p className="text-gray-600 mb-2 text-center">Know someone in need of a meal?</p>
           <button 
             onClick={() => router.push('/receiver/create')}
             className="w-full bg-[#FF7058] text-white py-3 rounded-xl font-medium hover:bg-[#ff8068] focus:outline-none focus:ring-2 focus:ring-[#FF7058] focus:ring-offset-2"
           >
-            + Create Food Request
+            Create Food Request
           </button>
         </div>
       </div>
@@ -123,9 +132,9 @@ export default function ReceiverHomePage() {
           {requestHistory.length > 3 && (
             <button
               onClick={() => setShowAllRequests(!showAllRequests)}
-              className="text-[#FF7058] text-sm hover:underline flex items-center gap-1"
+              className="text-white font-semibold bg-[#FF7058] px-4 py-2 rounded-xl text-sm justify-center mx-auto  hover:underline flex items-center gap-1"
             >
-              {showAllRequests ? '- Show Less' : '+ More'}
+              {showAllRequests ? 'Show Less' : 'Show More'}
             </button>
           )}
         </div>

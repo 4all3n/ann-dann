@@ -1,9 +1,10 @@
 import Image from 'next/image';
+import { StaticImageData } from 'next/image';
 
 interface RequestCardProps {
   name: string;
   distance: string;
-  image: string;
+  image: string | StaticImageData;
   status: 'Processing' | 'Completed';
 }
 
@@ -13,9 +14,11 @@ export default function RequestCard({ name, distance, image, status }: RequestCa
       <div className="flex items-start gap-4">
         {/* Image */}
         <div className="w-24 h-24 rounded-2xl overflow-hidden flex-shrink-0">
-          <img
+          <Image
             src={image}
             alt={name}
+            width={96}
+            height={96}
             className="w-full h-full object-cover"
           />
         </div>
