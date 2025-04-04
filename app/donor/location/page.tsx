@@ -238,145 +238,329 @@ export default function SelectLocationPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="p-6">
-        <h1 className="text-2xl font-semibold text-gray-900 mb-6">
-          Select your location
-        </h1>
+    <>
+      {/* Mobile View */}
+      <div className="lg:hidden min-h-screen bg-white">
+        <div className="p-6">
+          <h1 className="text-2xl font-semibold text-gray-900 mb-6">
+            Select your location
+          </h1>
 
-        {/* Search Bar */}
-        <div className="relative mb-4 z-[1000]" ref={searchContainerRef}>
-          <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-            <svg
-              className="w-5 h-5 text-gray-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+          {/* Search Bar */}
+          <div className="relative mb-4 z-[1000]" ref={searchContainerRef}>
+            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+              <svg
+                className="w-5 h-5 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            </div>
+            <input
+              type="text"
+              placeholder="Search for a location"
+              value={searchQuery}
+              onChange={handleSearch}
+              onFocus={() => {
+                if (searchResults.length > 0) {
+                  setShowResults(true);
+                }
+              }}
+              className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF7058] focus:border-transparent text-gray-600"
+            />
+            
+            {/* Search Results Dropdown */}
+            {showResults && searchResults.length > 0 && (
+              <div className="absolute z-[1000] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto">
+                {searchResults.map((result, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleSelectSearchResult(result)}
+                    className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-start gap-2"
+                  >
+                    <Image
+                      src={mapPin}
+                      alt="Location"
+                      width={16}
+                      height={16}
+                      className="mt-1 flex-shrink-0"
+                    />
+                    <span className="text-sm text-gray-700">{result.display_name}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Map Container */}
+          <div className="relative w-full h-[400px] bg-gray-100 rounded-lg mb-6 overflow-hidden z-0">
+            {/* Background Map Image */}
+            <div className="absolute inset-0">
+              <Image
+                src={mapsBackground}
+                alt="Map Background"
+                layout="fill"
+                objectFit="cover"
+                className="opacity-50"
+              />
+            </div>
+            
+            {selectedLocation ? (
+              <Map 
+                latitude={selectedLocation.latitude} 
+                longitude={selectedLocation.longitude} 
+              />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Image
+                  src={pinRadar}
+                  alt="Location Radar"
+                  width={200}
+                  height={200}
+                  className="absolute"
+                />
+              </div>
+            )}
+
+            {/* Current Location Button */}
+            <button
+              onClick={handleUseCurrentLocation}
+              disabled={isLoading}
+              className="absolute w-[60%] bottom-4 left-1/2 transform -translate-x-1/2 px-4 py-2.5 bg-white border border-[#FF7058] text-[#FF7058] rounded-lg flex items-center gap-2 hover:bg-[#FFF5F5] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              <Image
+                src={locationIcon}
+                alt="Location"
+                width={18}
+                height={18}
               />
-            </svg>
+              <span>{isLoading ? "Getting location..." : "Use Current Location"}</span>
+            </button>
           </div>
-          <input
-            type="text"
-            placeholder="Search for a location"
-            value={searchQuery}
-            onChange={handleSearch}
-            onFocus={() => {
-              if (searchResults.length > 0) {
-                setShowResults(true);
-              }
-            }}
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF7058] focus:border-transparent text-gray-600"
-          />
-          
-          {/* Search Results Dropdown */}
-          {showResults && searchResults.length > 0 && (
-            <div className="absolute z-[1000] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto">
-              {searchResults.map((result, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleSelectSearchResult(result)}
-                  className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-start gap-2"
-                >
-                  <Image
-                    src={mapPin}
-                    alt="Location"
-                    width={16}
-                    height={16}
-                    className="mt-1 flex-shrink-0"
+
+          {/* Selected Location */}
+          <div className="bg-white rounded-lg p-4 flex flex-col gap-2 shadow-sm mb-4">
+            <h2 className="text-sm font-normal text-gray-400 mb-3">Your Location</h2>
+            {selectedLocation && (
+              <div className="flex items-start gap-3">
+                <Image
+                  src={mapPin}
+                  alt="Location Pin"
+                  width={24}
+                  height={24}
+                  className="mt-1"
+                />
+                <p className="text-gray-800 text-base">
+                  {selectedLocation.address}
+                </p>
+              </div>
+            )}
+            {/* Continue Button */}
+            <button
+              onClick={handleContinue}
+              disabled={!selectedLocation}
+              className={`w-full py-3.5 rounded-2xl transition-colors text-base font-medium ${
+                selectedLocation
+                  ? 'bg-[#FF7058] text-white hover:bg-opacity-90'
+                  : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              }`}
+            >
+              Continue
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Desktop View */}
+      <div className="hidden lg:block min-h-screen bg-[#fafafa]">
+        <div className="max-w-7xl mx-auto py-12 px-8">
+          <div className="max-w-4xl mx-auto">
+            <h1 className="text-3xl font-semibold text-gray-900 mb-8">
+              Select your location
+            </h1>
+
+            <div className="grid grid-cols-2 gap-8">
+              {/* Left Column - Search and Map */}
+              <div className="space-y-6">
+                {/* Search Bar */}
+                <div className="relative z-[1000]" ref={searchContainerRef}>
+                  <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                    <svg
+                      className="w-5 h-5 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                      />
+                    </svg>
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Search for a location"
+                    value={searchQuery}
+                    onChange={handleSearch}
+                    onFocus={() => {
+                      if (searchResults.length > 0) {
+                        setShowResults(true);
+                      }
+                    }}
+                    className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#FF7058] focus:border-transparent text-gray-600 text-lg"
                   />
-                  <span className="text-sm text-gray-700">{result.display_name}</span>
+                  
+                  {/* Search Results Dropdown */}
+                  {showResults && searchResults.length > 0 && (
+                    <div className="absolute z-[1000] w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-auto">
+                      {searchResults.map((result, index) => (
+                        <button
+                          key={index}
+                          onClick={() => handleSelectSearchResult(result)}
+                          className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-start gap-3"
+                        >
+                          <Image
+                            src={mapPin}
+                            alt="Location"
+                            width={20}
+                            height={20}
+                            className="mt-1 flex-shrink-0"
+                          />
+                          <span className="text-gray-700">{result.display_name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Map Container */}
+                <div className="relative w-full h-[500px] bg-gray-100 rounded-xl overflow-hidden z-0 shadow-lg">
+                  {/* Background Map Image */}
+                  <div className="absolute inset-0">
+                    <Image
+                      src={mapsBackground}
+                      alt="Map Background"
+                      layout="fill"
+                      objectFit="cover"
+                      className="opacity-50"
+                    />
+                  </div>
+                  
+                  {selectedLocation ? (
+                    <Map 
+                      latitude={selectedLocation.latitude} 
+                      longitude={selectedLocation.longitude} 
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Image
+                        src={pinRadar}
+                        alt="Location Radar"
+                        width={200}
+                        height={200}
+                        className="absolute"
+                      />
+                    </div>
+                  )}
+
+                  {/* Current Location Button */}
+                  <button
+                    onClick={handleUseCurrentLocation}
+                    disabled={isLoading}
+                    className="absolute w-[70%] bottom-6 left-1/2 transform -translate-x-1/2 px-6 py-3 bg-white border border-[#FF7058] text-[#FF7058] rounded-xl flex items-center gap-3 hover:bg-[#FFF5F5] disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+                  >
+                    <Image
+                      src={locationIcon}
+                      alt="Location"
+                      width={24}
+                      height={24}
+                    />
+                    <span className="text-lg">{isLoading ? "Getting location..." : "Use Current Location"}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Right Column - Selected Location and Continue */}
+              <div className="space-y-6">
+                <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
+                  <h2 className="text-lg font-medium text-gray-700 mb-4">Your Location</h2>
+                  {selectedLocation ? (
+                    <div className="flex items-start gap-4">
+                      <Image
+                        src={mapPin}
+                        alt="Location Pin"
+                        width={32}
+                        height={32}
+                        className="mt-1"
+                      />
+                      <p className="text-gray-800 text-lg">
+                        {selectedLocation.address}
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-gray-500">No location selected</p>
+                  )}
+                </div>
+
+                <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
+                  <h2 className="text-lg font-medium text-gray-700 mb-4">Location Details</h2>
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-[#FFF5F5] flex items-center justify-center">
+                        <svg className="w-5 h-5 text-[#FF7058]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">Latitude</p>
+                        <p className="text-gray-800 font-medium">{selectedLocation?.latitude || 'Not selected'}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-[#FFF5F5] flex items-center justify-center">
+                        <svg className="w-5 h-5 text-[#FF7058]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">Longitude</p>
+                        <p className="text-gray-800 font-medium">{selectedLocation?.longitude || 'Not selected'}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Continue Button */}
+                <button
+                  onClick={handleContinue}
+                  disabled={!selectedLocation}
+                  className={`w-full py-4 rounded-xl transition-all text-lg font-medium ${
+                    selectedLocation
+                      ? 'bg-[#FF7058] text-white hover:bg-[#ff8068] transform hover:scale-[1.02] focus:scale-[0.98] shadow-md shadow-[#FF7058]/10'
+                      : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  }`}
+                >
+                  Continue
                 </button>
-              ))}
+              </div>
             </div>
-          )}
-        </div>
-
-        {/* Map Container */}
-        <div className="relative w-full h-[400px] bg-gray-100 rounded-lg mb-6 overflow-hidden z-0">
-          {/* Background Map Image */}
-          <div className="absolute inset-0">
-            <Image
-              src={mapsBackground}
-              alt="Map Background"
-              layout="fill"
-              objectFit="cover"
-              className="opacity-50"
-            />
           </div>
-          
-          {selectedLocation ? (
-            <Map 
-              latitude={selectedLocation.latitude} 
-              longitude={selectedLocation.longitude} 
-            />
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <Image
-                src={pinRadar}
-                alt="Location Radar"
-                width={200}
-                height={200}
-                className="absolute"
-              />
-            </div>
-          )}
-
-          {/* Current Location Button */}
-          <button
-            onClick={handleUseCurrentLocation}
-            disabled={isLoading}
-            className="absolute w-[60%] bottom-4 left-1/2 transform -translate-x-1/2 px-4 py-2.5 bg-white border border-[#FF7058] text-[#FF7058] rounded-lg flex items-center gap-2 hover:bg-[#FFF5F5] disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <Image
-              src={locationIcon}
-              alt="Location"
-              width={18}
-              height={18}
-            />
-            <span>{isLoading ? "Getting location..." : "Use Current Location"}</span>
-          </button>
-        </div>
-
-        {/* Selected Location */}
-        <div className="bg-white rounded-lg p-4 flex flex-col gap-2 shadow-sm mb-4">
-          <h2 className="text-sm font-normal text-gray-400 mb-3">Your Location</h2>
-          {selectedLocation && (
-            <div className="flex items-start gap-3">
-              <Image
-                src={mapPin}
-                alt="Location Pin"
-                width={24}
-                height={24}
-                className="mt-1"
-              />
-              <p className="text-gray-800 text-base">
-                {selectedLocation.address}
-              </p>
-            </div>
-          )}
-          {/* Continue Button */}
-          <button
-            onClick={handleContinue}
-            disabled={!selectedLocation}
-            className={`w-full py-3.5 rounded-2xl transition-colors text-base font-medium ${
-              selectedLocation
-                ? 'bg-[#FF7058] text-white hover:bg-opacity-90'
-                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-            }`}
-          >
-            Continue
-          </button>
         </div>
       </div>
 
       {/* Success Modal */}
       {showSuccessModal && <SuccessModal onContinue={handleSuccessContinue} />}
-    </div>
+    </>
   );
 }

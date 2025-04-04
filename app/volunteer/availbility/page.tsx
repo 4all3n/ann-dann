@@ -192,95 +192,208 @@ const AvailabilityPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white p-6 flex flex-col">
-      <div className="max-w-md mx-auto mt-16 flex-1">
-        <h1 className="text-3xl font-bold mb-6">Volunteer Availability</h1>
+    <>
+      {/* Mobile View */}
+      <div className="lg:hidden min-h-screen bg-white p-6 flex flex-col">
+        <div className="max-w-md mx-auto mt-16 flex-1">
+          <h1 className="text-3xl font-bold mb-6">Volunteer Availability</h1>
 
-        {/* Time Slots */}
-        <div className="bg-white rounded-xl border border-gray-200 p-4 mb-8">
-          <h2 className="text-lg font-semibold mb-4 text-gray-700">Select Time Slot</h2>
-          {['Morning', 'Afternoon', 'Night'].map((time) => (
-            <div key={time} className="mb-4 last:mb-0">
-              <label className="flex items-center cursor-pointer">
-                <div 
-                  onClick={() => handleTimeSelect(time)}
-                  className={`w-5 h-5 rounded-full border-2 mr-3 flex items-center justify-center
-                    ${selectedTime === time ? 'border-[#FF7058]' : 'border-gray-300'}`}
+          {/* Time Slots */}
+          <div className="bg-white rounded-xl border border-gray-200 p-4 mb-8">
+            <h2 className="text-lg font-semibold mb-4 text-gray-700">Select Time Slot</h2>
+            {['Morning', 'Afternoon', 'Night'].map((time) => (
+              <div key={time} className="mb-4 last:mb-0">
+                <label className="flex items-center cursor-pointer">
+                  <div 
+                    onClick={() => handleTimeSelect(time)}
+                    className={`w-5 h-5 rounded-full border-2 mr-3 flex items-center justify-center
+                      ${selectedTime === time ? 'border-[#FF7058]' : 'border-gray-300'}`}
+                  >
+                    {selectedTime === time && (
+                      <div className="w-2.5 h-2.5 rounded-full bg-[#FF7058]"></div>
+                    )}
+                  </div>
+                  <span className="text-gray-700">{time}</span>
+                </label>
+              </div>
+            ))}
+          </div>
+
+          {/* Day & Date */}
+          <h2 className="text-2xl font-semibold mb-6">DAY</h2>
+          
+          {/* Weekday indicators */}
+          <div className="p-2 mb-6">
+            <div className="flex gap-2 font-semibold">
+              {['M', 'T', 'W', 'Th', 'F', 'Sa', 'Su'].map((day, index) => (
+                <div
+                  key={day}
+                  onClick={() => handleDaySelect(day)}
+                  className={`w-10 h-10 rounded-full flex items-center justify-center cursor-pointer bg-[#F7FAFC]
+                    ${selectedDays.includes(day) 
+                      ? 'border-2 border-[#FF7058] text-[#FF7058]' 
+                      : 'text-gray-600'}
+                    ${index === 6 ? 'text-red-500' : ''}
+                    ${day === 'Th' || day === 'Sa' || day === 'Su' ? 'text-sm' : 'text-base'}`}
                 >
-                  {selectedTime === time && (
-                    <div className="w-2.5 h-2.5 rounded-full bg-[#FF7058]"></div>
-                  )}
+                  {day}
                 </div>
-                <span className="text-gray-700">{time}</span>
-              </label>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
 
-        {/* Day & Date */}
-        <h2 className="text-2xl font-semibold mb-6">DAY</h2>
-        
-        {/* Weekday indicators */}
-        <div className="p-2 mb-6">
-          <div className="flex gap-2 font-semibold">
-            {['M', 'T', 'W', 'Th', 'F', 'Sa', 'Su'].map((day, index) => (
-              <div
-                key={day}
-                onClick={() => handleDaySelect(day)}
-                className={`w-10 h-10 rounded-full flex items-center justify-center cursor-pointer bg-[#F7FAFC]
-                  ${selectedDays.includes(day) 
-                    ? 'border-2 border-[#FF7058] text-[#FF7058]' 
-                    : 'text-gray-600'}
-                  ${index === 6 ? 'text-red-500' : ''}
-                  ${day === 'Th' || day === 'Sa' || day === 'Su' ? 'text-sm' : 'text-base'}`}
-              >
-                {day}
+          {/* Day Preferences */}
+          <div className="space-y-6 mb-8">
+            {['Weekdays', 'Weekends'].map((preference) => (
+              <div key={preference} className="flex items-center">
+                <label className="flex items-center cursor-pointer">
+                  <div 
+                    onClick={() => handleGroupSelect(preference as 'Weekdays' | 'Weekends')}
+                    className={`w-6 h-6 rounded-lg mr-3 flex items-center justify-center
+                      ${(preference === 'Weekdays' && weekdays.every(day => selectedDays.includes(day))) ||
+                        (preference === 'Weekends' && weekendDays.every(day => selectedDays.includes(day)))
+                          ? 'bg-[#FF7058]' 
+                          : 'border-2 border-gray-300'}`}
+                  >
+                    {((preference === 'Weekdays' && weekdays.every(day => selectedDays.includes(day))) ||
+                      (preference === 'Weekends' && weekendDays.every(day => selectedDays.includes(day)))) && (
+                      <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </div>
+                  <span className="text-xl text-gray-800">{preference}</span>
+                </label>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Day Preferences */}
-        <div className="space-y-6 mb-8">
-          {['Weekdays', 'Weekends'].map((preference) => (
-            <div key={preference} className="flex items-center">
-              <label className="flex items-center cursor-pointer">
-                <div 
-                  onClick={() => handleGroupSelect(preference as 'Weekdays' | 'Weekends')}
-                  className={`w-6 h-6 rounded-lg mr-3 flex items-center justify-center
-                    ${(preference === 'Weekdays' && weekdays.every(day => selectedDays.includes(day))) ||
-                      (preference === 'Weekends' && weekendDays.every(day => selectedDays.includes(day)))
-                        ? 'bg-[#FF7058]' 
-                        : 'border-2 border-gray-300'}`}
-                >
-                  {((preference === 'Weekdays' && weekdays.every(day => selectedDays.includes(day))) ||
-                    (preference === 'Weekends' && weekendDays.every(day => selectedDays.includes(day)))) && (
-                    <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
-                    </svg>
-                  )}
-                </div>
-                <span className="text-xl text-gray-800">{preference}</span>
-              </label>
-            </div>
-          ))}
-        </div>
+        {/* Next Button */}
+        <button
+          onClick={handleNext}
+          className="w-full py-3 bg-[#FF7058] text-white rounded-md font-medium"
+        >
+          NEXT
+        </button>
       </div>
 
-      {/* Next Button */}
-      <button
-        onClick={handleNext}
-        className="w-full py-3 bg-[#FF7058] text-white rounded-md font-medium"
-      >
-        NEXT
-      </button>
+      {/* Desktop View */}
+      <div className="hidden lg:block min-h-screen bg-[#fafafa]">
+        <div className="max-w-7xl mx-auto py-12 px-8">
+          <div className="max-w-4xl mx-auto">
+            <h1 className="text-4xl font-bold text-gray-900 mb-8">Volunteer Availability</h1>
+
+            <div className="grid grid-cols-2 gap-8">
+              {/* Left Column - Time Slots */}
+              <div className="space-y-6">
+                <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                  <h2 className="text-xl font-semibold mb-6 text-gray-700">Select Time Slot</h2>
+                  <div className="space-y-4">
+                    {['Morning', 'Afternoon', 'Night'].map((time) => (
+                      <div key={time} className="mb-4 last:mb-0">
+                        <label className="flex items-center cursor-pointer group">
+                          <div 
+                            onClick={() => handleTimeSelect(time)}
+                            className={`w-6 h-6 rounded-full border-2 mr-4 flex items-center justify-center transition-all
+                              ${selectedTime === time 
+                                ? 'border-[#FF7058] bg-[#FFF5F5]' 
+                                : 'border-gray-300 group-hover:border-[#FF7058]/50'}`}
+                          >
+                            {selectedTime === time && (
+                              <div className="w-3 h-3 rounded-full bg-[#FF7058]"></div>
+                            )}
+                          </div>
+                          <span className="text-lg text-gray-700 group-hover:text-gray-900">{time}</span>
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Day Preferences */}
+                <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                  <h2 className="text-xl font-semibold mb-6 text-gray-700">Day Preferences</h2>
+                  <div className="space-y-6">
+                    {['Weekdays', 'Weekends'].map((preference) => (
+                      <div key={preference} className="flex items-center">
+                        <label className="flex items-center cursor-pointer group">
+                          <div 
+                            onClick={() => handleGroupSelect(preference as 'Weekdays' | 'Weekends')}
+                            className={`w-7 h-7 rounded-lg mr-4 flex items-center justify-center transition-all
+                              ${(preference === 'Weekdays' && weekdays.every(day => selectedDays.includes(day))) ||
+                                (preference === 'Weekends' && weekendDays.every(day => selectedDays.includes(day)))
+                                  ? 'bg-[#FF7058]' 
+                                  : 'border-2 border-gray-300 group-hover:border-[#FF7058]/50'}`}
+                          >
+                            {((preference === 'Weekdays' && weekdays.every(day => selectedDays.includes(day))) ||
+                              (preference === 'Weekends' && weekendDays.every(day => selectedDays.includes(day)))) && (
+                              <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                              </svg>
+                            )}
+                          </div>
+                          <span className="text-xl text-gray-700 group-hover:text-gray-900">{preference}</span>
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column - Calendar */}
+              <div className="space-y-6">
+                <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                  <h2 className="text-xl font-semibold mb-6 text-gray-700">Select Days</h2>
+                  
+                  {/* Weekday indicators */}
+                  <div className="grid grid-cols-7 gap-3 mb-6">
+                    {['M', 'T', 'W', 'Th', 'F', 'Sa', 'Su'].map((day, index) => (
+                      <div
+                        key={day}
+                        onClick={() => handleDaySelect(day)}
+                        className={`aspect-square rounded-xl flex items-center justify-center cursor-pointer transition-all
+                          ${selectedDays.includes(day) 
+                            ? 'bg-[#FF7058] text-white border-2 border-[#FF7058]' 
+                            : 'bg-[#F7FAFC] text-gray-600 border-2 border-transparent hover:border-[#FF7058]/50'}
+                          ${index === 5 || index === 6 ? 'text-red-500' : ''}
+                          ${day === 'Th' || day === 'Sa' || day === 'Su' ? 'text-sm' : 'text-base'}`}
+                      >
+                        {day}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Selected Days Summary */}
+                  <div className="mt-8 p-4 bg-[#FFF5F5] rounded-lg">
+                    <h3 className="text-sm font-medium text-gray-500 mb-2">Selected Days</h3>
+                    <p className="text-gray-700">
+                      {selectedDays.length > 0 
+                        ? selectedDays.join(', ')
+                        : 'No days selected'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Next Button */}
+                <button
+                  onClick={handleNext}
+                  className="w-full py-4 bg-[#FF7058] text-white rounded-xl font-medium text-lg hover:bg-[#ff8068] transition-all transform hover:scale-[1.02] focus:scale-[0.98] shadow-md shadow-[#FF7058]/10"
+                >
+                  NEXT
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Success Modal */}
       {showSuccessModal && <SuccessModal onContinue={handleContinue} />}
       
       {/* Error Modal */}
       {showErrorModal && <ErrorModal message={errorMessage} onClose={() => setShowErrorModal(false)} />}
-    </div>
+    </>
   );
 };
 
