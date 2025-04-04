@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 const SuccessModal = ({ onContinue }: { onContinue: () => void }) => {
@@ -68,35 +68,103 @@ const AvailabilityPage = () => {
   const [errorMessage, setErrorMessage] = useState('');
 
   const weekdays = ['M', 'T', 'W', 'Th', 'F'];
-  const weekendDays = ['S', 'S'];
+  const weekendDays = ['Sa', 'Su'];
+
+  useEffect(() => {
+    const volunteerData = JSON.parse(sessionStorage.getItem('volunteerDetails') || '{}');
+    if (volunteerData.timeSlot) {
+      setSelectedTime(volunteerData.timeSlot);
+    }
+    if (volunteerData.days && Array.isArray(volunteerData.days)) {
+      setSelectedDays(volunteerData.days);
+    }
+  }, []);
 
   const handleTimeSelect = (time: string) => {
     setSelectedTime(time);
+    const volunteerData = JSON.parse(sessionStorage.getItem('volunteerDetails') || '{}');
+    volunteerData.timeSlot = time;
+    sessionStorage.setItem('volunteerDetails', JSON.stringify(volunteerData));
   };
 
   const handleDaySelect = (day: string) => {
-    setSelectedDays(prev => 
-      prev.includes(day) 
-        ? prev.filter(d => d !== day)
-        : [...prev, day]
-    );
+    const updatedDays = selectedDays.includes(day)
+      ? selectedDays.filter(d => d !== day)
+      : [...selectedDays, day];
+    
+    setSelectedDays(updatedDays);
+    // Update sessionStorage
+    const volunteerData = JSON.parse(sessionStorage.getItem('volunteerDetails') || '{}');
+    volunteerData.days = updatedDays;
+    sessionStorage.setItem('volunteerDetails', JSON.stringify(volunteerData));
   };
 
   const handleGroupSelect = (group: 'Weekdays' | 'Weekends') => {
+    let updatedDays: string[];
     if (group === 'Weekdays') {
-      setSelectedDays(prev => {
-        const hasAllWeekdays = weekdays.every(day => prev.includes(day));
-        return hasAllWeekdays
-          ? prev.filter(day => !weekdays.includes(day))
-          : [...new Set([...prev, ...weekdays])];
+      const hasAllWeekdays = weekdays.every(day => selectedDays.includes(day));
+      updatedDays = hasAllWeekdays
+        ? selectedDays.filter(day => !weekdays.includes(day))
+        : [...new Set([...selectedDays, ...weekdays])];
+    } else {
+      const hasAllWeekends = weekendDays.every(day => selectedDays.includes(day));
+      updatedDays = hasAllWeekends
+        ? selectedDays.filter(day => !weekendDays.includes(day))
+        : [...new Set([...selectedDays, ...weekendDays])];
+    }
+    
+    setSelectedDays(updatedDays);
+    // Update sessionStorage
+    const volunteerData = JSON.parse(sessionStorage.getItem('volunteerDetails') || '{}');
+    volunteerData.days = updatedDays;
+    sessionStorage.setItem('volunteerDetails', JSON.stringify(volunteerData));
+  };
+
+  const handleContinue = async () => {
+    try {
+      // Get the complete volunteer data from sessionStorage
+      const volunteerData = JSON.parse(sessionStorage.getItem('volunteerDetails') || '{}');
+      
+      // Make sure we have the latest time slot and days
+      volunteerData.timeSlot = selectedTime;
+      volunteerData.days = selectedDays;
+
+      // Log the data being sent
+      console.log('Sending volunteer data:', volunteerData);
+
+      // Send data to our Next.js API route
+      const response = await fetch('/api/volunteers', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(volunteerData),
       });
-    } else if (group === 'Weekends') {
-      setSelectedDays(prev => {
-        const hasAllWeekends = weekendDays.every(day => prev.includes(day));
-        return hasAllWeekends
-          ? prev.filter(day => !weekendDays.includes(day))
-          : [...new Set([...prev, ...weekendDays])];
-      });
+
+      const responseData = await response.json();
+      console.log('Response:', responseData);
+
+      if (!response.ok) {
+        throw new Error(responseData.error || 'Failed to submit volunteer data');
+      }
+
+      // Clear the session storage after successful submission
+      sessionStorage.removeItem('volunteerDetails');
+      
+      // Show success modal
+      setShowSuccessModal(true);
+    } catch (error) {
+      console.error('Error submitting volunteer data:', error);
+      let errorMessage = 'Failed to submit your details.\nPlease try again.';
+      
+      if (error instanceof TypeError && error.message === 'Failed to fetch') {
+        errorMessage = 'Unable to connect to the server.\nPlease try again later.';
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
+      setErrorMessage(errorMessage);
+      setShowErrorModal(true);
     }
   };
 
@@ -108,12 +176,19 @@ const AvailabilityPage = () => {
       setErrorMessage('Please select at least\none day!');
       setShowErrorModal(true);
     } else {
-      setShowSuccessModal(true);
+      // Get existing data
+      const volunteerData = JSON.parse(sessionStorage.getItem('volunteerDetails') || '{}');
+      
+      // Update with latest selections
+      volunteerData.timeSlot = selectedTime;
+      volunteerData.days = selectedDays;
+      
+      // Save back to sessionStorage
+      sessionStorage.setItem('volunteerDetails', JSON.stringify(volunteerData));
+      
+      // Proceed with submission
+      handleContinue();
     }
-  };
-
-  const handleContinue = () => {
-    router.push('/volunteer/home');
   };
 
   return (
@@ -148,7 +223,7 @@ const AvailabilityPage = () => {
         {/* Weekday indicators */}
         <div className="p-2 mb-6">
           <div className="flex gap-2 font-semibold">
-            {['M', 'T', 'W', 'Th', 'F', 'S', 'S'].map((day, index) => (
+            {['M', 'T', 'W', 'Th', 'F', 'Sa', 'Su'].map((day, index) => (
               <div
                 key={day}
                 onClick={() => handleDaySelect(day)}
@@ -157,7 +232,7 @@ const AvailabilityPage = () => {
                     ? 'border-2 border-[#FF7058] text-[#FF7058]' 
                     : 'text-gray-600'}
                   ${index === 6 ? 'text-red-500' : ''}
-                  ${day === 'Th' ? 'text-sm' : 'text-base'}`}
+                  ${day === 'Th' || day === 'Sa' || day === 'Su' ? 'text-sm' : 'text-base'}`}
               >
                 {day}
               </div>
